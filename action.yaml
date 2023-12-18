@@ -7,6 +7,9 @@ outputs:
   image_tag:
     description: The image tag for the current commit
     value: ${{ steps.vars.outputs.image_tag }}
+  is_tag:
+    description: Whether the current commit is a tag
+    value: ${{ steps.vars.outputs.is_tag }}
 
 runs:
   using: "composite"
@@ -16,15 +19,18 @@ runs:
       if: ${{ github.ref_type == 'tag' }}
       run: |
         echo "IMAGE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+        echo "IS_TAG=true" >> $GITHUB_ENV
 
     - name: Set env var for commit hash
       shell: bash
       if: ${{ github.ref_type != 'tag' }}
       run: |
         echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        echo "IS_TAG=false" >> $GITHUB_ENV
 
     - name: set output vars
       shell: bash
       id: vars
       run: |
         echo image_tag=${{ env.IMAGE_TAG }} >> $GITHUB_OUTPUT
+        echo is_tag=${{ env.IS_TAG }} >> $GITHUB_OUTPUT
